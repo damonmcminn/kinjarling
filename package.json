@@ -1,0 +1,19 @@
+{
+  "name": "rt.practicehub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "parse-config": "git://github.com/damonmcminn/parse-config.git",
+    "socket.io": "^1.3.5",
+    "source-map-support": "^0.2.10"
+  }
+}
