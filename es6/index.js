@@ -12,15 +12,19 @@ const io = socketIO({path});
 
 export default {io, api}
 
-api.post('/:group/:event', (req, res) => {
+api.use(json());
+api.post('/:group', (req, res) => {
 
-  let {group, event} = req.params;
+  let {group} = req.params;
+  let data = req.body;
+
+  console.log(group, data);
 
   let deny = groups.indexOf(group) === -1;
 
   if (deny) return res.sendStatus(403);
 
-  io.to(group).emit('broadcast', {name: event});
+  io.to(group).emit('broadcast', data);
   res.sendStatus(200);
 
 });
