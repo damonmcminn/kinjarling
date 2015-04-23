@@ -15,6 +15,11 @@ export default {io, api}
 api.post('/:group/:event', (req, res) => {
 
   let {group, event} = req.params;
+
+  let deny = groups.indexOf(group) === -1;
+
+  if (deny) return res.sendStatus(403);
+
   io.to(group).emit('broadcast', {name: event});
   res.sendStatus(200);
 
