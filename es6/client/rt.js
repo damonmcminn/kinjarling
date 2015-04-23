@@ -15,30 +15,35 @@ let rt = ((group, uri, events) => {
     eventMap[event.name] = event.fn;
   });
 
-  socket.on('broadcast', data => {
+  socket.on('broadcast', message => {
+    let {name, client, data} = message;
+
     // find the event
-    if (socket.id !== data.client) {
+    if (socket.id !== client) {
       // execute mapped function
-      eventMap[data.name]();
+      eventMap[name](data);
     }
   });
 
   return function(event) {
+
+    let {name, data} = event;
+
+    if (!name) {
+      name = event;
+    }
     
-    let {connected} = socket;
+    let {connected, id} = socket;
 
-    let data = {
-      name: event,
-      client: socket.id
-    };
+    let message = {name, data, client: id};
 
-    let validEvent = eventMap[event];
+    let validEvent = eventMap[name];
 
     if (validEvent && connected) {
-      socket.emit('broadcast', data);
-      return `Broadcasted event: ${event}`;
+      socket.emit('broadcast', message);
+      return `Broadcasted event: ${name}`;
     } else if (!validEvent) {
-      return `Invalid event: ${event}`;
+      return `Invalid event: ${name}`;
     } else {
       return `No connection. Is group '${group}' correct?`;
     }
