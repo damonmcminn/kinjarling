@@ -3,11 +3,22 @@ install();
 
 import socketIO from 'socket.io';
 import {path, groups} from 'parse-config';
+import express from 'express';
+import {json} from 'body-parser';
+
+const api = express();
 
 const io = socketIO({path});
 
-export default io;
+export default {io, api}
 
+api.post('/:group/:event', (req, res) => {
+
+  let {group, event} = req.params;
+  io.to(group).emit('broadcast', {name: event});
+  res.sendStatus(200);
+
+});
 
 io.on('connection', socket => {
   let {client, group} = socket.handshake.query

@@ -1,6 +1,11 @@
 'use strict';
 
-const server = require('./lib');
-const PORT = require('parse-config').socketPort;
+const rt = require('./lib');
 
-server.listen(PORT);
+const CONFIG = require('parse-config');
+const SOCKET_PORT = CONFIG.socketPort;
+const API_PORT = CONFIG.apiPort;
+
+
+rt.io.listen(SOCKET_PORT);
+rt.api.listen(API_PORT);
