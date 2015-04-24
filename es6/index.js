@@ -6,6 +6,10 @@ import {path, groups} from 'parse-config';
 import express from 'express';
 import {json} from 'body-parser';
 
+function log(data) {
+  console.log(JSON.stringify(data));
+}
+
 const api = express();
 
 const io = socketIO({path});
@@ -19,11 +23,13 @@ api.post('/:group', (req, res) => {
   let data = req.body;
 
   let {token} = req.headers;
-  // check token
+  // check token; payload includes providerId, exp
+  // check if group matches allowed groups
 
   let deny = (!token || groups.indexOf(group) === -1);
 
   if (deny) return res.sendStatus(403);
+  log({timestamp: new Date(), event: 'API call', group, data})
 
   io.to(group).emit('broadcast', data);
   res.sendStatus(200);
@@ -31,11 +37,13 @@ api.post('/:group', (req, res) => {
 });
 
 io.on('connection', socket => {
-  let {client, group} = socket.handshake.query
+  let {user, group} = socket.handshake.query
   
+  log({timestamp: new Date(), event: 'Client connection', user, group})
   socket.join(group);
 
   socket.on('broadcast', data => {
+    log({timestamp: new Date(), event: 'Client broadcast', group, data, user})
     io.to(group).emit('broadcast', data);
   });
 
@@ -44,11 +52,12 @@ io.on('connection', socket => {
 
 io.set('authorization', (handshake, callback) => {
 
-  let {group} = handshake._query;
+  let {group, user} = handshake._query;
 
   let deny = groups.indexOf(group) === -1;
 
   if (deny) {
+    log({timestamp: new Date(), event: 'DENY', group, user})
     callback(new Error('DENY'));
   } else {
     callback(null, true);

@@ -16,7 +16,7 @@ let rt = ((options) => {
 
   let socket = io(host, {
     path: `${path}`,
-    query: `group=${group}`
+    query: `group=${group}&user=${user}`
   });
 
   // build hash map of events
