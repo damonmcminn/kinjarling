@@ -18,9 +18,10 @@ api.post('/:group', (req, res) => {
   let {group} = req.params;
   let data = req.body;
 
-  console.log(group, data);
+  let {token} = req.headers;
+  // check token
 
-  let deny = groups.indexOf(group) === -1;
+  let deny = (!token || groups.indexOf(group) === -1);
 
   if (deny) return res.sendStatus(403);
 
