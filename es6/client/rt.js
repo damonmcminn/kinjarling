@@ -1,4 +1,14 @@
-let rt = ((group, uri, events) => {
+let rt = ((options) => {
+
+  let {user, group, events, uri} = options;
+
+  if (!user || !group) {
+    return 'Missing user and/or group';
+  }
+
+  if (!uri) {
+    uri = 'https://damonmcminn.com/rt';
+  }
 
   let path = /\/\w+$/i.exec(uri).pop();
 
