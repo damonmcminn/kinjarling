@@ -9,7 +9,8 @@ class Service(object):
 
     def generate_api_key(self):
         # len % 0 == 0 means no trailing =
-        return b64encode(urandom(30))
+        # websafe
+        return b64encode(urandom(30)).replace('+', '-').replace('/', '_')
 
     def save(self):
         key = self.generate_api_key()
