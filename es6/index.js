@@ -1,9 +1,13 @@
 import {install} from 'source-map-support';
 install();
 
-import io from './io';
-import api from './api';
-import {socketPort, apiPort} from 'parse-config';
+import {server} from './src/io';
+import api from './src/api';
+import {socketPort, apiPort} from './config';
 
-io.listen(socketPort);
-api.listen(apiPort);
+server.listen(socketPort, () => {
+  console.log(`WebSocket server listening on ${socketPort}`);
+});
+api.listen(apiPort, () => {
+  console.log(`API server listening on ${apiPort}`);
+});
