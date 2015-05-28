@@ -5,7 +5,7 @@ from cli import get_args
 def main():
     args = get_args()
 
-    if not args.save or not args.new_key:
+    if not args.save and not args.new_key:
         print 'Either --save or --new-key required'
         return
 
