@@ -15,6 +15,9 @@ const io = new SocketIO(server, {
   origins
 });
 
+// client ids -> socket ids; for private messaging etc
+const clients = {};
+
 function validateGroup(group) {
   return _.includes(this._groups, group);
 }
@@ -28,6 +31,10 @@ io.on('connection', socket => {
     io.to(group).emit('broadcast', data);
   });
 
+  socket.on('private', event => {
+    io.to(event.receiver).emit('private', event.message);
+  });
+
 });
 
 io.use(function(socket, next) {
@@ -38,6 +45,11 @@ io.use(function(socket, next) {
     if (err || !client) {
       next(err || new Error('DENY'));
     } else {
+
+      // add client to hashmap, going to grow large fast
+      // need to prune when clients disconnect (or are idle for long time?)
+      clients[user] = {socketId: socket.id, timestamp: new Date()};
+
       // attach allowed groups to socket and provide validation method
       socket._groups = client.groups;
       socket.validateGroup = validateGroup;
