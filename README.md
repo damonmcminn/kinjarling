@@ -13,14 +13,12 @@ Kinjarling is the [Noongar](http://www.noongarculture.org.au/) for place of rain
 - Python
 - pymongo
 
-## Build
-#### Server
-- Transpile source with `npm run babel`
-
-#### Browser
+## Installation
+- Install dependencies with `npm install`
 - Transpile source with `npm run babel`
 - Write minified build to `static/kinjarling.min.js` with `npm run browser-build`. Approx ~67KB, most of which is the `socket.io-client` library.
-- If you require a `require('able')` -- ah-ha! -- module, you can find a single file at `client/Kinjarling.js` in `es6` or `lib` (once transpiled). Depends upon `socket.io.client` and the path declared in `config`.
+
+If you require a `require('able')` -- ah-ha! -- module, you can find a single file at `client/Kinjarling.js` in `es6` or `lib` (once transpiled). Depends upon `socket.io.client` and the path declared in `config`.
 
 ## Config
 One, many or all options can be overridden by setting a KINJARLING environment variable with JSON.
