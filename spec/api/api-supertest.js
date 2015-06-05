@@ -40,7 +40,13 @@ describe('Server API', function() {
     it('should remove groups from services', function(done) {
       agent.delete('/group/' + group)
       .set(auth)
-      .expect({ok: 1, nModified: 1, n: 1}, done);
+      .expect(200, {deleted: group}, done);
+    });
+
+    it('should return 404 if group does not exist', function(done) {
+      agent.delete('/group/' + 'not_a_group')
+      .set(auth)
+      .expect(404, {id: 'not_a_group', message: 'Not found'}, done);
     });
 
   });
@@ -69,7 +75,7 @@ describe('Server API', function() {
     it('should return a unique client', function(done) {
       agent.post('/client')
       .set(auth)
-      .send({service: 'test', groups: ['test'], serviceClientId: 'test'})
+      .send({groups: ['test']})
       .expect(function(res) {
         clientId = res.body.client;
       })
@@ -79,7 +85,7 @@ describe('Server API', function() {
     it('should remove clients', function(done) {
       agent.delete('/client/' + clientId)
       .set(auth)
-      .expect(200, done);
+      .expect(200, {deleted: clientId}, done);
     });
 
   });
