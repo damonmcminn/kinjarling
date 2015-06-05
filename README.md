@@ -12,6 +12,9 @@ Kinjarling is the [Noongar](http://www.noongarculture.org.au/) for place of rain
 - MongoDB
 - Python
 - pymongo
+- Babel
+
+If you wish to run tests, you also need `mocha`.
 
 ## Installation
 - Install dependencies with `npm install`
