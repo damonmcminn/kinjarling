@@ -15,7 +15,6 @@ const GroupSchema = mongoose.Schema({
 
 const ClientSchema = mongoose.Schema({
   _id: required,
-  serviceClientId: required,
   groups: [String],
   service: required,
 });
