@@ -1,6 +1,5 @@
 import io from 'socket.io-client';
 import {path} from '../config';
-import _ from 'lodash';
 
 function Kinjarling(options) {
   let {user, group, events, host} = options;
@@ -51,7 +50,7 @@ Kinjarling.prototype = {
   },
   execute (name, data) {
     let fn = this.events[name];
-    if (_.isFunction(fn)) {
+    if (fn) {
       fn(data);
     }
   }
