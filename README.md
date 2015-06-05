@@ -1,52 +1,187 @@
-### What this application is for
-authenticated pub/sub for clients in groups
-e.g. an appointment calendar shared across devices
-- for use with multiple services i.e. applications
-- groups are for isolation within services e.g. the CalendarApplication service has a Customer group. Clients can connect to that group and all will receive the same broadcasts. Finer grained isolation can be achieved with creating more groups e.g. the Customer group requires role based pub/sub for AdminUsers and GeneralUsers; as the group ids are unique these isolate each other. Kinjarling doesn't care whether AdminUsers and GeneralUsers are "sub-groups" of Customer; they are all treated the same server side. Their association with with the CalendarApplication service. Managing sub groups etc is entirely left up to individual applications, Kinjarling just provides cryptographically secure ids.
+## Why Kinjarling?
+You want a standalone service to provide authenticated pub/sub for one or more applications.
+Supports WebSockets **only**.
 
-Private messages to single clients can be achieved by used client.sendPrivate(id, data)
+Kinjarling has been developed as a pub/sub replacement for polling the database for changes from within a Drupal application. The application has discrete groups with members sharing a single calendar where knowing the up-to-date status of the calendar is critical for avoiding scheduling conflicts.
 
-### Prereqs
-MongoDB
-Node.js (es5?)
-Python
-pymongo
+## What does Kinjarling mean?
+Kinjarling is the [Noongar](http://www.noongarculture.org.au/) for place of rain.
 
-### Security model
-- clients are pre-authed via the server API and provided with unique client and group id's which are required to connect to the Kinjarling server
+## Requirements
+- Node.js
+- MongoDB
+- Python
+- pymongo
 
-### Browser
-WS protocol matches HTTP protocol by default and won't allow insecure websocket connections from a secure origin.
-
-If, for some reason, you are running your app over HTTP you and wish to force a secure websocket connection, you can use `wss://hostname` otherwise the above stands.
-
-options: user, group, host, events
-
-
-### Build
-##### Server
+## Build
+#### Server
 - Transpile source with `npm run babel`
-##### Browser
+
+#### Browser
 - Transpile source with `npm run babel`
-- Write minified build to `static/kinjarling.min.js` with `npm run browser-build`
-If you require a `require('able')` -- ah-ha! -- module, you can find a single file at `client/Kinjarling.js` in `es6` or `lib` (once transpiled). Depends upon 'lodash' and 'socket.io.client' and the path declared in `config`.
+- Write minified build to `static/kinjarling.min.js` with `npm run browser-build`. Approx ~67KB, most of which is the `socket.io-client` library.
+- If you require a `require('able')` -- ah-ha! -- module, you can find a single file at `client/Kinjarling.js` in `es6` or `lib` (once transpiled). Depends upon `socket.io.client` and the path declared in `config`.
 
-### Config
-defaults are:
+## Config
+One, many or all options can be overridden by setting a KINJARLING environment variable with JSON.
+#### `socketPort: 9100`
+- socket server port
 
-JSON in the KINJARLING environment variable overrides this i.e. either use the defaults or provide them in environment variable KINJARLING.
+#### `apiPort: 9101`
+- HTTP API port
 
-### Webserver
-- Written to be application independent (so can't use from within an existing Node.js app without further development -- sorry!)
-- If serving from the same sub/domain as your application/s you'll need to proxy requests to the socket server e.g. `domain.com/kinjarling => localhost:9100`. Here is my local NGINX setup as an example:
+#### `path: kinjarling`
+- path for routing socket connections
+- `npm run browser-build` uses this for appending `path` to `host`
 
-### Command-line tool
-- Written in Python with a dependency on `pymongo`
-- execute `./service-manager.sh`
-- `--uri` option to change host, port, db, etc. Defaults to `localhost:27017/kinjarling`
-- create new services with --save --name [name]
-- create a new API key with --new-key --name [name]
+#### `mongoURI: mongodb://localhost:27017/kinjarling`
+- MongoDB URI connection string
 
-### Scaling
-Designed for use on a single server so scaling not yet implemented
-Planned: optional Redis
+#### `origins: *:*`
+- Allowed origins
+
+
+## Browser usage
+#### Instantiate a client
+```javascript
+// assumes Kinjarling available in namespace
+
+var client = new Kinjarling({
+  user: 'clientId',
+  group: 'groupId',
+  host: 'host.com', // if undefined, defaults to location.host
+  events: {
+    foo: function(bar) {
+      console.log(bar);
+    }
+  }
+});
+```
+
+#### Public methods and properties
+#### `#broadcast(name, [data])`
+- `name` is event identifier e.g. `client.broadcast('foo', 'bar') // bar`
+- `data` is optional e.g. `client.broadcast('foo') // undefined`
+
+#### `#isConnected()`
+- returns `true` or `false`
+
+#### `#isSecure()`
+- returns `true` or `false`
+- relevant only if using WSS from an HTTP application (but not sure why you'd be doing this...)
+
+#### `#getSocketId()`
+- returns `String` of `socket.io` session id
+
+#### `#socket`
+- the underlying `socket.io` instance
+
+The `client` will only receive events broadcasted to the `group` it has authenticated against and will ignore any events to which it is not subscribed. This allow the server to be agnostic about events and just be a middleman for group broadcasts.
+
+## Deployment
+If serving from the same (sub) domain as your application/s you'll need to proxy requests to the socket server e.g. `domain.com/kinjarling => localhost:9100`. Here is my local NGINX setup as an example:
+
+```
+upstream socket_server {
+    server 127.0.0.1:9100;
+}
+
+upstream api_server {
+    server 127.0.0.1:9101;
+}
+
+server {
+  listen 80;
+  server_name web.dev;
+
+  location /kinjarling/ {
+      proxy_pass http://socket_server;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+  }
+
+  location / {
+    proxy_pass http://api_server;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+  }
+}
+```
+
+## Command-line tool: `service-manage.sh`
+Options
+#### `--uri`
+- Optional. MongoDB URI connection string (without `mongodb://`). Defaults to `localhost:27017/kinjarling`.
+
+#### `--name`
+- Required. The name with which you wish to identify an individual service (i.e. discrete application). Must be unique.
+
+#### `--save` *OR* `--new-key`
+- Required. Save a new service or generate a new api key for an existing service.
+
+
+## Service HTTP API
+All routes require header `Authorization: Bearer foobar` where `foobar` is an API key generated by the `service-manager.sh` CLI tool
+
+####`POST /group`
+Returns JSON with unique group ID
+```javascript
+{
+  "group": "ItrAKCMehPMHOrhgQ7UzrjJR"
+}
+```
+
+####`DELETE /group/:id`
+Returns JSON with outcome
+```javascript
+// group exists, 200
+{
+  "deleted": "ItrAKCMehPMHOrhgQ7UzrjJR"
+}
+
+// group does not exist, 404
+{
+  "id": "not_a_group",
+  "message": "Not found"
+}
+```
+
+####`POST /broadcast/:groupId --data={"name":"foo","data":"any valid JSON data"}`
+Returns `200 OK` on success and `404 {"message":"Group not found"}` on failure.
+Neither 'name' nor `data` are required (though not supplying an event `name` means the broadcast will "fail" silently).
+
+####`POST /client --data={"groups":["foo"]}`
+Returns JSON with unique client ID
+Requires `groups` (Array of group ids)
+
+```javascript
+{
+  "client": "R_0EnjM6di89FTXPBtAL4i7E"
+}
+```
+
+####`DELETE /client/:id`
+```javascript
+// client exists, 200
+{
+  "deleted": "R_0EnjM6di89FTXPBtAL4i7E"
+}
+
+// client does not exist, 404
+{
+  "id": "not_a_client",
+  "message": "Not found"
+}
+```
+
+## Debugging
+#### Browser
+`Kinjarling#socket` fully exposes the underlying underlying `socket.io` instance.
+
+#### Server
+Use environment variable `DEBUG=socket.io*` to get `stdout` logs
+
+## Scaling
+Designed for use in an environment where a single server is sufficient. Plan to implement optional use of Redis with [socket.io-redis](https://github.com/Automattic/socket.io-redis)
