@@ -9,13 +9,10 @@ def main():
         print 'Either --save or --new-key required'
         return
 
-    host = '%s:%d' % (args.host, args.port)
-    if args.user:
-        conn_string = 'mongodb://%s:%s@%s' % (args.user, args.password, host)
-    else:
-        conn_string = 'mongodb://%s' % host
+    connection_string = 'mongodb://%s' % args.uri
 
-    db = MongoClient(conn_string)[args.db].services
+    # instance of Collection
+    db = MongoClient(connection_string).get_default_database().services
     service = Service(args.name, db)
 
     if args.save:
