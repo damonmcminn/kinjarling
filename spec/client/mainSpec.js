@@ -3,6 +3,7 @@
 var Kinjarling = require('../../es6/client/Kinjarling');
 var socketPort = require('../../es6/config').socketPort;
 var host = 'localhost:' + socketPort;
+// var host = 'api.dev';
 
 describe('Kinjarling', function() {
 
