@@ -11,7 +11,7 @@
     "test-server-watch": "nodemon -w lib/src -w spec/api -i admin -x 'mocha spec/api'",
     "test-browser": "echo 'Server MUST be up\n' && karma start --single-run",
     "browser-watchify": "watchify lib/client/main.js --debug -o static/kinjarling.min.js",
-    "browser-build": "browserify lib/client/main.js | uglifyjs -cm > static/kinjarling.min.js",
+    "browser-build": "mkdir static; browserify lib/client/main.js | uglifyjs -cm > static/kinjarling.min.js",
     "babel-watch": "babel -w es6 --out-dir lib --source-maps",
     "babel": "babel es6 --out-dir lib --source-maps",
     "api": "DEBUG=socket.io* nodemon index.js -w es6 -i es6/client"
