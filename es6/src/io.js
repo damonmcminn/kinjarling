@@ -32,10 +32,16 @@ io.on('connection', socket => {
 
 io.use(function(socket, next) {
 
+
   let {group, user} = socket.handshake.query;
 
   Client.findOne({_id: user, groups: group}, (err, client) => {
     if (err || !client) {
+      // give socket enough time to receive DENY, then disconnect
+      // io.nsps['/'] shows clients, rooms etc
+      setTimeout(function() {
+        socket.disconnect();
+      }, 200);
       next(err || new Error('DENY'));
     } else {
       // attach allowed groups to socket and provide validation method
