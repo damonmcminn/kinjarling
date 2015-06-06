@@ -1,4 +1,4 @@
-import io from 'socket.io-client';
+import IO from 'socket.io-client';
 import {path} from '../config';
 
 function Kinjarling(options) {
@@ -6,10 +6,11 @@ function Kinjarling(options) {
   this._group = group;
 
   // default to same domain if no host provided
-  this.socket = io(host || location.host, {
+  this.socket = new IO(host || location.host, {
     path,
     query: `group=${group}&user=${user}`,
-    transports: ['websocket']
+    transports: ['websocket'],
+    multiplex: false
   });
 
   this.events = events;
