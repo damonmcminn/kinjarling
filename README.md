@@ -11,10 +11,7 @@ Kinjarling is the [Noongar](http://www.noongarculture.org.au/) for place of rain
 - Node.js
 - MongoDB
 - Python
-- pymongo
-- Babel
-
-If you wish to run tests, you also need `mocha`.
+ - pymongo
 
 ## Installation
 - Install dependencies with `npm install`
@@ -178,11 +175,7 @@ Requires `groups` (Array of group ids)
 ```
 
 ## Debugging
-#### Browser
-`Kinjarling#socket` fully exposes the underlying underlying `socket.io` instance.
-
-#### Server
-Use environment variable `DEBUG=socket.io*` to get `stdout` logs
+Use the `socket.io` [Logging and Debugging](http://socket.io/docs/logging-and-debugging/)
 
 ## Scaling
 Designed for use in an environment where a single server is sufficient. Plan to implement optional use of Redis with [socket.io-redis](https://github.com/Automattic/socket.io-redis)
