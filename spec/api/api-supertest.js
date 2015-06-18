@@ -87,6 +87,13 @@ describe('Server API', function() {
       .expect(/client":/, done);
     });
 
+    it('should return 404 if group not found', function(done) {
+      agent.post('/client')
+      .set(auth)
+      .send({groups: ['not a group']})
+      .expect(404, done);
+    });
+
     it('should remove clients', function(done) {
       agent.delete('/client/' + clientId)
       .set(auth)

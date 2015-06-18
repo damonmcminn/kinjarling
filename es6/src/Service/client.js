@@ -7,12 +7,28 @@ function ClientFactory() {}
 
 ClientFactory.prototype = {
   create (req, res) {
-    // check group is in req.service.groups()
+
+    let validGroups = req.service.groups;
+    let groups = req.body.groups;
+
+    // check groups are in groups
+    let allGroupsValid = _.every(groups, function(group) {
+      return _.includes(validGroups, group);
+    });
+
+    if (!allGroupsValid) {
+      return res.status(404).json({
+        message: 'One or more invalid groups',
+        groups
+      })
+    }
+
     let client = new Client(_.assign({
       _id: generateId(),
       service: req.service.id,
       secret: generateId(24)
     }, req.body));
+
     client.save((err, doc) => {
       if (err) {
         res.status(400).json(err);
