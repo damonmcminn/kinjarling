@@ -71,6 +71,7 @@ describe('Server API', function() {
   describe('/client', function() {
 
     var clientId;
+    var secret;
 
     it('should return a unique client', function(done) {
       agent.post('/client')
@@ -78,6 +79,10 @@ describe('Server API', function() {
       .send({groups: ['test']})
       .expect(function(res) {
         clientId = res.body.client;
+        secret = res.body.secret;
+        if (!res.body.secret) {
+          throw new Error('No secret');
+        }
       })
       .expect(/client":/, done);
     });
@@ -86,6 +91,17 @@ describe('Server API', function() {
       agent.delete('/client/' + clientId)
       .set(auth)
       .expect(200, {deleted: clientId}, done);
+    });
+
+    it('should change the client api key', function(done) {
+      agent.put('/client/' + clientId)
+      .set(auth)
+      .expect(function(res) {
+        if (!res.body.secret || secret === res.body.secret) {
+          throw new Error('secret not changed');
+        }
+      })
+      .end(done);
     });
 
   });

@@ -22,7 +22,10 @@ function validateGroup(group) {
 io.on('connection', socket => {
   let {group} = socket.handshake.query;
 
-  socket.join(group);
+  // only join group if client is a member
+  if (socket.validateGroup(group)) {
+    socket.join(group);
+  }
 
   socket.on('broadcast', data => {
     io.to(group).emit('broadcast', data);
@@ -32,10 +35,9 @@ io.on('connection', socket => {
 
 io.use(function(socket, next) {
 
+  let {clientId, secret, group} = socket.handshake.query;
 
-  let {group, user} = socket.handshake.query;
-
-  Client.findOne({_id: user, groups: group}, (err, client) => {
+  Client.findOne({_id: clientId, groups: group, secret}, (err, client) => {
     if (err || !client) {
       // give socket enough time to receive DENY, then disconnect
       // io.nsps['/'] shows clients, rooms etc

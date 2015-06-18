@@ -7,12 +7,17 @@ function ClientFactory() {}
 
 ClientFactory.prototype = {
   create (req, res) {
-    let client = new Client(_.assign({_id: generateId(), service: req.service.id}, req.body));
+    // check group is in req.service.groups()
+    let client = new Client(_.assign({
+      _id: generateId(),
+      service: req.service.id,
+      secret: generateId(24)
+    }, req.body));
     client.save((err, doc) => {
       if (err) {
         res.status(400).json(err);
       } else {
-        res.json({client: doc._id});
+        res.json({client: doc._id, secret: doc.secret});
       }
     });
   },
@@ -27,7 +32,22 @@ ClientFactory.prototype = {
 
       return res.status(status).json(response);
     });
+  },
+
+  update (req, res) {
+    let secret = generateId(24);
+    Client.update({_id: req.params.id}, {$set: {secret: secret}}, (err) => {
+      if (err) {
+        res.status(400).json(err);
+      } else {
+        res.status(200).json({
+          client: req.params.id,
+          secret: secret
+        });
+      }
+    });
   }
+
 };
 
 export default ClientFactory;

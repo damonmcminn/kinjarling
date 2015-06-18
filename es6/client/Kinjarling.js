@@ -2,13 +2,14 @@ import IO from 'socket.io-client';
 import {path} from '../config';
 
 function Kinjarling(options) {
-  let {user, group, events, host} = options;
+  let {clientId, group, events, host, secret} = options;
   this._group = group;
 
   // default to same domain if no host provided
   this.socket = new IO(host || location.host, {
     path,
-    query: `group=${group}&user=${user}`,
+    // secret must be passed in query string as is WebSocket, cannot use headers
+    query: `group=${group}&clientId=${clientId}&secret=${secret}`,
     transports: ['websocket'],
     multiplex: false
   });

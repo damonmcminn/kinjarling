@@ -17,6 +17,7 @@ const ClientSchema = mongoose.Schema({
   _id: required,
   groups: [String],
   service: required,
+  secret: required
 });
 
 const ServiceSchema = mongoose.Schema({

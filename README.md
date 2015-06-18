@@ -45,8 +45,9 @@ One, many or all options can be overridden by setting a KINJARLING environment v
 // assumes Kinjarling available in namespace
 
 var client = new Kinjarling({
-  user: 'clientId',
+  clientId: 'clientId',
   group: 'groupId',
+  secret: 'token'
   host: 'host.com', // if undefined, defaults to location.host
   events: {
     foo: function(bar) {
@@ -151,12 +152,29 @@ Returns `200 OK` on success and `404 {"message":"Group not found"}` on failure.
 Neither 'name' nor `data` are required (though not supplying an event `name` means the broadcast will "fail" silently).
 
 ####`POST /client --data={"groups":["foo"]}`
-Returns JSON with unique client ID
+Returns JSON with unique client ID and secret key
 Requires `groups` (Array of group ids)
 
 ```javascript
 {
-  "client": "R_0EnjM6di89FTXPBtAL4i7E"
+  "client": "R_0EnjM6di89FTXPBtAL4i7E",
+  "secret": "isjLgDQJVmOejTcz3Dp7VPi-Cs2IXhth"
+}
+```
+
+####`PUT /client/:id`
+Returns JSON with new secret key
+```javascript
+// client exists, 200
+{
+  "client": "R_0EnjM6di89FTXPBtAL4i7E",
+  "secret": "i_v4S4sHRQO6kks4iCepGRvoGx4GxExai"
+}
+
+// client does not exist, 404
+{
+  "id": "not_a_client",
+  "message": "Not found"
 }
 ```
 

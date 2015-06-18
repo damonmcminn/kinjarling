@@ -8,8 +8,9 @@ var host = 'localhost:' + socketPort;
 describe('Kinjarling', function() {
 
   var client = new Kinjarling({
-    user: 'foo',
+    clientId: 'foo',
     group: 'test',
+    secret: 'bar',
     host: host,
     events: {
       'foo': function(data) {
