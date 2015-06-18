@@ -29,3 +29,7 @@ api.post('/client', (req, res) => {
 api.delete('/client/:id', (req, res) => {
   req.service.client.remove(req, res);
 });
+
+api.put('/client/:id', (req, res) => {
+  req.service.client.update(req, res);
+});
