@@ -14,7 +14,8 @@
     "browser-build": "mkdir static; browserify lib/client/main.js | uglifyjs -cm > static/kinjarling.min.js",
     "babel-watch": "babel -w es6 --out-dir lib --source-maps",
     "babel": "babel es6 --out-dir lib --source-maps",
-    "api": "DEBUG=socket.io* nodemon index.js -w es6 -i es6/client"
+    "api": "DEBUG=socket.io* nodemon index.js -w es6 -i es6/client",
+    "postinstall": "npm run babel && npm run browser-build"
   },
   "author": "",
   "license": "ISC",
